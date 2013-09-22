@@ -20,7 +20,7 @@ class CompressorService extends BaseApplicationComponent
 
     public function __construct()
     {
-        $this->document_root = craft()->config->get('documentRoot');
+        $this->document_root = $_SERVER['DOCUMENT_ROOT'];
         $this->cache_dir = $this->document_root . "/cache";
         $this->cache_url = Craft::getSiteUrl() . "/cache";
     }
@@ -78,10 +78,6 @@ class CompressorService extends BaseApplicationComponent
 
     public function css($css)
     {
-      /*require_once(__DIR__ . '/../lib/Minify/CSS.php');
-      require_once(__DIR__ . '/../lib/Minify/CSS/Compressor.php');
-      require_once(__DIR__ . '/../lib/Minify/CommentPreserver.php');*/
-
       if (!is_array($css)) $css = array($css);
 
       $recache = $this->recache($css, "css");
@@ -110,8 +106,6 @@ class CompressorService extends BaseApplicationComponent
         $replace = array(";", ";", "{", ":#", ",", ":\'", ":$1", "{", "}");
         $css = preg_replace($search, $replace, $css);
         $css = str_replace("\n", null, $css);
-
-        //$css = \Minify_CSS::minify($css_content, array('preserve_comments' => true));
 
         file_put_contents($cached_file, $css);
         return $this->outputCss(basename($cached_file));
