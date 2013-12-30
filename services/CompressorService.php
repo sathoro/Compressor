@@ -22,7 +22,9 @@ class CompressorService extends BaseApplicationComponent
     {
         $this->document_root = $_SERVER['DOCUMENT_ROOT'];
         $this->cache_dir = $this->document_root . "/cache";
-        $this->cache_url = Craft::getSiteUrl() . "/cache";
+        $this->cache_url = rtrim(Craft::getSiteUrl(), '/') . "/cache";
+
+        IOHelper::ensureFolderExists($this->cache_dir);
     }
 
     private function recache($files, $ext)
@@ -114,8 +116,6 @@ class CompressorService extends BaseApplicationComponent
 
     public function js($js)
     {
-      require_once(__DIR__ . '/../lib/Minify/JS/ClosureCompiler.php');
-
       if (!is_array($js)) $js = array($js);
       
       $recache = $this->recache($js, "js");
@@ -135,7 +135,17 @@ class CompressorService extends BaseApplicationComponent
           $js_content .= file_get_contents($file);
         }
 
-        $minified = \Minify_JS_ClosureCompiler::minify($js_content);
+        $bytes = strlen($js_content);
+        if ($bytes < 200000)
+        {
+          require_once(__DIR__ . '/../lib/Minify/JS/ClosureCompiler.php');
+          $minified = \Minify_JS_ClosureCompiler::minify($js_content);
+        }
+        else
+        {
+          require_once(__DIR__ . '/../lib/JShrink/Minifier.php');
+          $minified = \JShrink\Minifier::minify($js_content, array('flaggedComments' => false));
+        }
 
         file_put_contents($cached_file, $minified);
         return $this->outputJs(basename($cached_file));
