@@ -27,3 +27,10 @@ Will output:
 	<script src="http://example.com/cache/cached.0c4a14a00d89f6a600a931c274ad16ba.js"></script>
 
 When any CSS or JS file is updated or removed the file will be generated with a new hash and filename.
+
+Setup
+================
+
+- Download this repository, rename the folder to 'compressor' and upload to craft/plugins directory.
+- Create a 'cache' directory at public/cache and make sure it is writable by Apache.
+- Enjoy!
