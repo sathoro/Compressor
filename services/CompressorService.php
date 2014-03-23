@@ -82,6 +82,17 @@ class CompressorService extends BaseApplicationComponent
     {
       if (!is_array($css)) $css = array($css);
 
+      if (craft()->config->get('devMode')) 
+      {
+        $html = "";
+        foreach ($css as $file)
+        {
+          $html .= "<link rel=\"stylesheet\" href=\"$file\">";
+        }
+        $charset = craft()->templates->getTwig()->getCharset();
+        return new \Twig_Markup($html, $charset);
+      }
+
       $recache = $this->recache($css, "css");
       if ($recache['recache'] === false) 
       {
@@ -117,6 +128,17 @@ class CompressorService extends BaseApplicationComponent
     public function js($js)
     {
       if (!is_array($js)) $js = array($js);
+
+      if (craft()->config->get('devMode')) 
+      {
+        $html = "";
+        foreach ($js as $file)
+        {
+          $html .= "<script src=\"$file\"></script>";
+        }
+        $charset = craft()->templates->getTwig()->getCharset();
+        return new \Twig_Markup($html, $charset);
+      }
       
       $recache = $this->recache($js, "js");
       if ($recache['recache'] === false)
