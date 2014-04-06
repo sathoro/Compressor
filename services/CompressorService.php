@@ -157,11 +157,18 @@ class CompressorService extends BaseApplicationComponent
           $js_content .= file_get_contents($file);
         }
 
-        $bytes = strlen($js_content);
-        if ($bytes < 200000)
+        $bytes = mb_strlen($js_content);
+        if ($bytes < 199000)
         {
-          require_once(__DIR__ . '/../lib/Minify/JS/ClosureCompiler.php');
-          $minified = \Minify_JS_ClosureCompiler::minify($js_content);
+          try
+          {
+            require_once(__DIR__ . '/../lib/Minify/JS/ClosureCompiler.php');
+            $minified = \Minify_JS_ClosureCompiler::minify($js_content);
+          }
+          catch (Exception $e) {
+            require_once(__DIR__ . '/../lib/JShrink/Minifier.php');
+            $minified = \JShrink\Minifier::minify($js_content, array('flaggedComments' => false));
+          }
         }
         else
         {
