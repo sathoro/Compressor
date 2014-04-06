@@ -63,7 +63,7 @@ class Minify_JS_ClosureCompiler {
         }
         if ($response === '') {
             $errors = $this->_getResponse($this->_buildPostBody($js, true));
-            return false;th
+            return false;
         }
         return $response;
     }
