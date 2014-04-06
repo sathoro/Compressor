@@ -58,12 +58,12 @@ class Minify_JS_ClosureCompiler {
                           . "\n(Using fallback minifier)\n*/\n";
                 $response .= call_user_func($this->_fallbackFunc, $js);
             } else {
-                throw new Minify_JS_ClosureCompiler_Exception($response);
+                return false;
             }
         }
         if ($response === '') {
             $errors = $this->_getResponse($this->_buildPostBody($js, true));
-            throw new Minify_JS_ClosureCompiler_Exception($errors);
+            return false;th
         }
         return $response;
     }
