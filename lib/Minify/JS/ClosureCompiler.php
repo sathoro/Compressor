@@ -49,9 +49,7 @@ class Minify_JS_ClosureCompiler {
             ? mb_strlen($postBody, '8bit')
             : strlen($postBody);
         if ($bytes > 200000) {
-            throw new Minify_JS_ClosureCompiler_Exception(
-                'POST content larger than 200000 bytes'
-            );
+            return false;
         }
         $response = $this->_getResponse($postBody);
         if (preg_match('/^Error\(\d\d?\):/', $response)) {
