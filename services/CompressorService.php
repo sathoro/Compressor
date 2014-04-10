@@ -22,7 +22,7 @@ class CompressorService extends BaseApplicationComponent
     {
         $this->document_root = $_SERVER['DOCUMENT_ROOT'];
         $this->cache_dir = $this->document_root . "/cache";
-        $this->cache_url = rtrim(Craft::getSiteUrl(), '/') . "/cache";
+        $this->cache_url = rtrim(craft()->getSiteUrl(), '/') . "/cache";
 
         IOHelper::ensureFolderExists($this->cache_dir);
     }
