@@ -17,12 +17,13 @@ class CompressorService extends BaseApplicationComponent
     protected $cache_dir;
     protected $cache_url;
     protected $document_root;
+    protected $http_protocol;
 
     public function __construct()
     {
         $this->document_root = $_SERVER['DOCUMENT_ROOT'];
         $this->cache_dir = $this->document_root . "/cache";
-        $this->cache_url = rtrim(craft()->getSiteUrl(), '/') . "/cache";
+        $this->cache_url = $this->makeBaseCacheUrl();
 
         IOHelper::ensureFolderExists($this->cache_dir);
     }
@@ -52,7 +53,7 @@ class CompressorService extends BaseApplicationComponent
       return array('recache' => false, 'cache_file' => basename($cached_file));
     }
 
-    private function makeCachePath($file) 
+    private function makeCachePath($file)
     {
         return $this->cache_dir . '/' . ltrim($file, '/');
     }
@@ -62,10 +63,19 @@ class CompressorService extends BaseApplicationComponent
         return $this->cache_url . '/' . ltrim($file, '/');
     }
 
+    private function makeBaseCacheUrl()
+    {
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')
+        {
+            $this->http_protocol = 'https';
+        }
+        return rtrim(craft()->getSiteUrl($this->http_protocol), '/') . "/cache";
+    }
+
     private function outputCss($file)
     {
         $html = "<link rel=\"stylesheet\" href=\"" . $this->makeCacheUrl($file) . "\">";
- 
+
         $charset = craft()->templates->getTwig()->getCharset();
         return new \Twig_Markup($html, $charset);
     }
@@ -73,7 +83,7 @@ class CompressorService extends BaseApplicationComponent
     private function outputJs($file)
     {
         $html = "<script src=\"" . $this->makeCacheUrl($file) . "\"></script>";
- 
+
         $charset = craft()->templates->getTwig()->getCharset();
         return new \Twig_Markup($html, $charset);
     }
@@ -82,7 +92,7 @@ class CompressorService extends BaseApplicationComponent
     {
       if (!is_array($css)) $css = array($css);
 
-      if (craft()->config->get('devMode')) 
+      if (craft()->config->get('devMode'))
       {
         $html = "";
         foreach ($css as $file)
@@ -94,7 +104,7 @@ class CompressorService extends BaseApplicationComponent
       }
 
       $recache = $this->recache($css, "css");
-      if ($recache['recache'] === false) 
+      if ($recache['recache'] === false)
       {
           return $this->outputCss($recache['cache_file']);
       }
@@ -129,7 +139,7 @@ class CompressorService extends BaseApplicationComponent
     {
       if (!is_array($js)) $js = array($js);
 
-      if (craft()->config->get('devMode')) 
+      if (craft()->config->get('devMode'))
       {
         $html = "";
         foreach ($js as $file)
@@ -139,7 +149,7 @@ class CompressorService extends BaseApplicationComponent
         $charset = craft()->templates->getTwig()->getCharset();
         return new \Twig_Markup($html, $charset);
       }
-      
+
       $recache = $this->recache($js, "js");
       if ($recache['recache'] === false)
       {
@@ -159,7 +169,7 @@ class CompressorService extends BaseApplicationComponent
 
         require_once(__DIR__ . '/../lib/Minify/JS/ClosureCompiler.php');
         $minified = \Minify_JS_ClosureCompiler::minify($js_content);
-        if (!$minified) 
+        if (!$minified)
         {
           require_once(__DIR__ . '/../lib/JShrink/Minifier.php');
           $minified = \JShrink\Minifier::minify($js_content, array('flaggedComments' => false));
