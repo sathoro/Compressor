@@ -21,7 +21,7 @@ class CompressorService extends BaseApplicationComponent
 
     public function __construct()
     {
-        $this->document_root = $_SERVER['DOCUMENT_ROOT'];
+        $this->document_root = \Craft\Craft::getPathOfAlias('webroot');
         $this->cache_dir = $this->document_root . "/cache";
         $this->cache_url = $this->makeBaseCacheUrl();
 
@@ -34,9 +34,9 @@ class CompressorService extends BaseApplicationComponent
 
       foreach($files as $file)
       {
-        if (strpos($file, '.com') === false)
+        if ($this->isLocalFile($file))
         {
-          $file_path = $this->document_root . $file;
+          $file_path = $this->document_root . '/' . ltrim($file, '/');
           if (!is_file($file_path)) throw new Exception(Craft::t("$file_path is not a valid file!"));
           $modified_times[] = filemtime($file_path);
         }
@@ -116,7 +116,7 @@ class CompressorService extends BaseApplicationComponent
 
         foreach($css as $file)
         {
-          $file = (strpos($file, '.com') === false) ?  $this->document_root . $file : $file;
+          $file = ($this->isLocalFile($file)) ?  $this->document_root . '/' . ltrim($file, '/') : $file;
           $css_content .= file_get_contents($file);
         }
 
@@ -163,7 +163,7 @@ class CompressorService extends BaseApplicationComponent
 
         foreach($js as $file)
         {
-          $file = (strpos($file, '.com') === false) ?  $this->document_root . $file : $file;
+          $file = ($this->isLocalFile($file)) ?  $this->document_root . '/' . ltrim($file, '/') : $file;
           $js_content .= file_get_contents($file);
         }
 
@@ -178,5 +178,10 @@ class CompressorService extends BaseApplicationComponent
         file_put_contents($cached_file, $minified);
         return $this->outputJs(basename($cached_file));
       }
+    }
+
+    public function isLocalFile($file)
+    {
+        return !preg_match("/^(https?:)?\\/\\//i", $file);
     }
 }
